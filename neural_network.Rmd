@@ -1,0 +1,92 @@
+---
+title: "Neural Network"
+author: "Mohd Azmi"
+date: "12/05/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Environment
+
+## Packages
+
+```{r}
+library(pacman)
+p_load(h2o, Metrics, tidyverse)
+h2o.init()
+```
+
+## Dataset
+
+```{r}
+consultation.frame <- h2o.importFile("consultation_fee.csv")
+consultation.frame
+```
+
+```{r}
+normalize <- function(x){
+  return <- ((x - min(x)) / (max(x) - min(x)))
+}
+```
+
+```{r}
+consultation.frame$Experience_norm <- normalize(consultation.frame$Experience)
+consultation.frame$Rating_norm <- normalize(consultation.frame$Rating)
+consultation.frame$Fees_norm <- normalize(consultation.frame$Fees)
+```
+
+## Data Split
+
+```{r}
+split <- h2o.splitFrame(consultation.frame, ratios = .7)
+train <- split[[1]]
+test <- split[[2]]
+```
+
+
+# Analyze
+
+## Neural Network
+
+```{r}
+nn <- h2o.deeplearning(x = c(1,4,5,7,8), y = 9, training_frame = train, epochs = 500, mini_batch_size = 32, hidden = c(20,20), seed = 1)
+```
+
+## Plot
+
+```{r}
+plot(nn)
+```
+
+## evaluation
+
+```{r}
+pred_fee <- h2o.predict(nn, test)
+rmse(test$Fees_norm, pred_fee)
+```
+
+# Regularization
+
+## Early Stopping
+
+```{r}
+nn1 <- h2o.deeplearning(x = c(1,4,5,7,8), y = 9, training_frame = train, epochs = 500, mini_batch_size = 32, hidden = c(20,20), seed = 1, stopping_metric = "rmse", stopping_rounds = 3, stopping_tolerance = .05, score_interval = 1)
+
+```
+
+```{r}
+pred_fee2 <- h2o.predict(nn1, test)
+rmse(test$Fees_norm, pred_fee2)
+```
+
+## Drop-out Regularization
+
+```{r}
+nn2 <- h2o.deeplearning(x = c(1,4,5,7,8), y = 9, training_frame = train, epochs = 500, mini_batch_size = 32, hidden = c(20,20), seed = 1, stopping_metric = "rmse", stopping_rounds = 3, stopping_tolerance = .05, score_interval = 1, input_dropout_ratio = .2)
+
+pred_fee3 <- h2o.predict(nn2, test)
+rmse(test$Fees_norm, pred_fee3)
+```
