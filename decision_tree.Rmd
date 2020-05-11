@@ -1,0 +1,96 @@
+---
+title: "Prac_LR"
+author: "Mohd Azmi"
+date: "11/05/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Environment
+
+## Packages
+
+```{r}
+library(pacman)
+p_load(Metrics, tidyverse, rpart)
+```
+
+## Dataset
+
+```{r}
+diabetes <- read.csv("diabetes.csv")
+diabetes
+```
+
+# Analysis
+
+## split data
+
+```{r}
+sample_ind <- sample(nrow(diabetes), nrow(diabetes)*.7)
+train <- diabetes[sample_ind,]
+test <- diabetes[-sample_ind,]
+```
+
+## regression tree
+
+```{r}
+regtreemod <- rpart(diabetes ~ ., data = train, method = "anova", control = rpart.control(cp=0))
+```
+
+## Plot
+
+```{r}
+plot(regtreemod)
+text(regtreemod, cex = .5)
+```
+
+## Evaluation
+
+```{r}
+test$pred <- predict(regtreemod, newdata = test)
+rmse(test$diabetes, test$pred)
+```
+
+# Pruning
+
+## Pre-Running
+
+```{r}
+regtreemod1 <- rpart(diabetes ~ ., data = train, method = "anova", control = rpart.control(cp=0, maxdepth = 6, minsplit = 70))
+
+test$pred2 <- predict(regtreemod1, newdata = test)
+
+rmse(test$diabetes, test$pred2)
+```
+
+## Post-running
+
+```{r}
+printcp(regtreemod)
+```
+
+```{r}
+plotcp(regtreemod)
+```
+
+```{r}
+bestcp <- regtreemod$cptable[which.min(regtreemod$cptable[,"xerror"]), "CP"]
+bestcp
+
+regtreemod2 <- rpart(diabetes ~ ., data = train, method = "anova", control = rpart.control(cp=bestcp))
+
+test$pred3 <- predict(regtreemod2, newdata = test)
+
+rmse(test$diabetes, test$pred3)
+```
+
+## Export plot
+
+```{r}
+post(regtreemod2, file = "reg_tree_prune.ps", title = "Regression Tress for Diabetes dataset")
+```
+

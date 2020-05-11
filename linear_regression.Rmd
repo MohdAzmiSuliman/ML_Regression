@@ -1,0 +1,55 @@
+---
+title: "Prac_LR"
+author: "Mohd Azmi"
+date: "11/05/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Environment
+
+## Packages
+
+```{r}
+library(pacman)
+p_load(Metrics, tidyverse)
+```
+
+## Dataset
+
+```{r}
+diabetes <- read.csv("diabetes.csv")
+diabetes
+```
+
+# Analysis
+
+## split data
+
+```{r}
+sample_ind <- sample(nrow(diabetes), nrow(diabetes)*.7)
+train <- diabetes[sample_ind,]
+test <- diabetes[-sample_ind,]
+```
+
+## linear regression model
+
+```{r}
+lrmod <- lm(diabetes ~ ., data = train)
+summary(lrmod)
+```
+
+## Evaluation
+
+```{r}
+test$pred <- predict(lrmod, newdata = test)
+rmse(test$diabetes, test$pred)
+test <- test %>% mutate(errresid = pred - diabetes,
+                        sqresid = errresid^2)
+sqrt(sum(test$sqresid)/133)
+
+```
+
