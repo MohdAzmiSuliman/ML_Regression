@@ -75,6 +75,7 @@ rmse(test$Fees_norm, pred_fee)
 ```{r}
 nn1 <- h2o.deeplearning(x = c(1,4,5,7,8), y = 9, training_frame = train, epochs = 500, mini_batch_size = 32, hidden = c(20,20), seed = 1, stopping_metric = "rmse", stopping_rounds = 3, stopping_tolerance = .05, score_interval = 1)
 
+plot(nn1)
 ```
 
 ```{r}
@@ -85,7 +86,9 @@ rmse(test$Fees_norm, pred_fee2)
 ## Drop-out Regularization
 
 ```{r}
-nn2 <- h2o.deeplearning(x = c(1,4,5,7,8), y = 9, training_frame = train, epochs = 500, mini_batch_size = 32, hidden = c(20,20), seed = 1, stopping_metric = "rmse", stopping_rounds = 3, stopping_tolerance = .05, score_interval = 1, input_dropout_ratio = .2)
+nn2 <- h2o.deeplearning(x = c(1,4,5,7,8), y = 9, training_frame = train, epochs = 500, mini_batch_size = 32, hidden = c(20,20), seed = 1, stopping_metric = "rmse", stopping_rounds = 3, stopping_tolerance = .05, score_interval = 1, activation="RectifierWithDropout", hidden_dropout_ratio = c(.5,.5))
+
+plot(nn2)
 
 pred_fee3 <- h2o.predict(nn2, test)
 rmse(test$Fees_norm, pred_fee3)
