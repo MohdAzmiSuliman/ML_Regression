@@ -62,6 +62,9 @@ rmse(test$diabetes, test$pred)
 ```{r}
 regtreemod1 <- rpart(diabetes ~ ., data = train, method = "anova", control = rpart.control(cp=0, maxdepth = 6, minsplit = 70))
 
+plot(regtreemod1)
+text(regtreemod1, cex = .5)
+
 test$pred2 <- predict(regtreemod1, newdata = test)
 
 rmse(test$diabetes, test$pred2)
@@ -83,6 +86,9 @@ bestcp
 
 regtreemod2 <- rpart(diabetes ~ ., data = train, method = "anova", control = rpart.control(cp=bestcp))
 
+plot(regtreemod2)
+text(regtreemod2, cex = .5)
+
 test$pred3 <- predict(regtreemod2, newdata = test)
 
 rmse(test$diabetes, test$pred3)
@@ -91,6 +97,6 @@ rmse(test$diabetes, test$pred3)
 ## Export plot
 
 ```{r}
-post(regtreemod2, file = "reg_tree_prune.ps", title = "Regression Tress for Diabetes dataset")
+#post(regtreemod2, file = "reg_tree_prune.ps", title = "Regression Tress for Diabetes dataset")
 ```
 
